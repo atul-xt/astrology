@@ -28,23 +28,22 @@ const AstrologyForm = () => {
       const [hour, min] = formData.birthTime.split(':');
   
       const data = {
-        day: parseInt(day, 10),
-        month: parseInt(month, 10),
-        year: parseInt(year, 10),
-        hour: parseInt(hour, 10),
-        min: parseInt(min, 10),
+        day: parseInt(day),
+        month: parseInt(month),
+        year: parseInt(year),
+        hour: parseInt(hour),
+        min: parseInt(min),
         lat: 19.132,
         lon: 72.342, 
         tzone: 5.5 
       };
   
-      const headers = new Headers();
-      headers.append("Authorization", `Basic ${btoa(`${userId}:${apiKey}`)}`);
-      headers.append("Content-Type", "application/json");
-  
       const requestOptions = {
         method: 'POST',
-        headers: headers,
+        headers: {
+            "Authorization": `Basic ${btoa(`${userId}:${apiKey}`)}`,
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify(data)
       };
   
@@ -54,6 +53,7 @@ const AstrologyForm = () => {
           throw new Error(`Error: ${response.status}`);
         }
         const result = await response.json();
+        console.log(result);
         setResponseData(result);
       } catch (error) {
         setError(error.message);
