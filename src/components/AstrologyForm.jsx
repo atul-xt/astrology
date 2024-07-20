@@ -1,71 +1,176 @@
-import React, { useState } from 'react';
+import axios from "axios";
+import React, { useState } from "react";
+import { apiEndpoints } from "./apiEndpoints";
 
 const AstrologyForm = () => {
-    const [formData, setFormData] = useState({
-      name: '',
-      birthDate: '',
-      birthTime: '',
-      birthPlace: ''
+  const [formData, setFormData] = useState({
+    name: "",
+    birthDate: "",
+    birthTime: "",
+    birthPlace: "",
+  });
+
+  const [responseData, setResponseData] = useState(null);
+  const [error, setError] = useState(null);
+
+  const userId = 612511;
+  const apiKey = "a3a014ee35f19c7c8ddf42bd1b7972bb";
+  const baseUrl = "https://json.astrologyapi.com/v1/";
+  const language = "en";
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
     });
-  
-    const [responseData, setResponseData] = useState(null);
-    const [error, setError] = useState(null);
-  
-    const userId = 632129;
-    const apiKey = '3c63d275a9aa3f083d7a827552fa8b2e0d730915';
-    const baseUrl = 'https://json.astrologyapi.com/v1/';
-  
-    const handleChange = (e) => {
-      setFormData({
-        ...formData,
-        [e.target.name]: e.target.value
-      });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const [year, month, day] = formData.birthDate.split("-");
+    const [hour, min] = formData.birthTime.split(":");
+    let newFinalData = {};
+
+    const data = {
+      day: parseInt(day),
+      month: parseInt(month),
+      year: parseInt(year),
+      hour: parseInt(hour),
+      min: parseInt(min),
+      lat: 19.132,
+      lon: 72.342,
+      tzone: 5.5,
+      varshaphal_year: 2024,
+      dasha_date: "8-02-2024",
+      place: "mumbai",
+      maxRows: 6,
+      country_code: "Asia/Kolkata",
+      isDst: true,
+      latitude: 19.23232,
+      longitude: 72.23234,
+      date: "01-06-2000",
+      m_day: 6,
+      m_month: 1,
+      m_year: 2000,
+      m_hour: 7,
+      m_min: 45,
+      m_lat: 19.132,
+      m_lon: 72.342,
+      m_tzone: 5.5,
+      f_day: 6,
+      f_month: 1,
+      f_year: 2000,
+      f_hour: 7,
+      f_min: 45,
+      f_lat: 19.132,
+      f_lon: 72.342,
+      f_tzone: 5.5,
+      you_date: 10,
+      you_month: 5,
+      you_year: 1990,
+      you_gender: "male",
+      match_date: 3,
+      match_month: 5,
+      match_year: 1992,
+      match_gender: "female",
+      match_name: formData.name,
     };
-  
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      const [year, month, day] = formData.birthDate.split('-');
-      const [hour, min] = formData.birthTime.split(':');
-  
-      const data = {
-        day: parseInt(day),
-        month: parseInt(month),
-        year: parseInt(year),
-        hour: parseInt(hour),
-        min: parseInt(min),
-        lat: 19.132,
-        lon: 72.342, 
-        tzone: 5.5 
-      };
-  
-      const requestOptions = {
-        method: 'POST',
-        headers: {
-            "Authorization": `Basic ${btoa(`${userId}:${apiKey}`)}`,
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-      };
-  
-      try {
-        const response = await fetch(`${baseUrl}astro_details`, requestOptions);
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
+
+    const requestOptions = {
+      headers: {
+        Authorization: `Basic ${btoa(`${userId}:${apiKey}`)}`,
+        "Content-Type": "application/json",
+        "Accept-Language": language,
+      },
+    };
+
+    await Promise.all(
+      apiEndpoints.map(async (endpoint) => {
+        try {
+          const response = await axios.post(
+            `${baseUrl}${endpoint}`,
+            data,
+            requestOptions
+          );
+          newFinalData[endpoint] = response.data;
+        } catch (error) {
+          setError(error.message);
         }
-        const result = await response.json();
-        console.log(result);
-        setResponseData(result);
-      } catch (error) {
-        setError(error.message);
-      }
-    };
+      })
+    );
+
+    setResponseData(newFinalData);
+  };
+
+  const renderTable = (data) => {
+    if (Array.isArray(data) && data.length > 0) {
+      return (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-200">
+            <thead>
+              <tr>
+                {Object.keys(data[0] || {}).map((key) => (
+                  <th
+                    key={key}
+                    className="px-4 py-2 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    {key}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((item, index) => (
+                <tr key={index} className="bg-white">
+                  {Object.values(item).map((value, subIndex) => (
+                    <td
+                      key={subIndex}
+                      className="px-4 py-2 border-b border-gray-200 text-sm text-gray-700"
+                    >
+                      {typeof value === "object" ? renderTable(value) : value}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    } else if (typeof data === "object" && data !== null) {
+      return (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-200">
+            <tbody>
+              {Object.entries(data).map(([key, value]) => (
+                <tr key={key} className="bg-white">
+                  <td className="px-4 py-2 border-b border-gray-200 text-sm font-medium text-gray-700">
+                    {key}
+                  </td>
+                  <td className="px-4 py-2 border-b border-gray-200 text-sm text-gray-700">
+                    {typeof value === "object" ? renderTable(value) : value}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4 sm:px-6 lg:px-8">
-      <div className="p-8 w-full max-w-md sm:max-w-lg lg:max-w-xl xl:max-w-2xl bg-white shadow-md rounded">
+      <div className="p-8 w-full bg-white shadow-md rounded">
         <h2 className="text-2xl font-bold mb-6">Astrology Form</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block mb-2 text-sm font-bold text-gray-700" htmlFor="name">Name</label>
+            <label
+              className="block mb-2 text-sm font-bold text-gray-700"
+              htmlFor="name"
+            >
+              Name
+            </label>
             <input
               id="name"
               name="name"
@@ -76,7 +181,12 @@ const AstrologyForm = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block mb-2 text-sm font-bold text-gray-700" htmlFor="birthDate">Birth Date</label>
+            <label
+              className="block mb-2 text-sm font-bold text-gray-700"
+              htmlFor="birthDate"
+            >
+              Birth Date
+            </label>
             <input
               id="birthDate"
               name="birthDate"
@@ -87,7 +197,12 @@ const AstrologyForm = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block mb-2 text-sm font-bold text-gray-700" htmlFor="birthTime">Birth Time</label>
+            <label
+              className="block mb-2 text-sm font-bold text-gray-700"
+              htmlFor="birthTime"
+            >
+              Birth Time
+            </label>
             <input
               id="birthTime"
               name="birthTime"
@@ -98,7 +213,12 @@ const AstrologyForm = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block mb-2 text-sm font-bold text-gray-700" htmlFor="birthPlace">Birth Place</label>
+            <label
+              className="block mb-2 text-sm font-bold text-gray-700"
+              htmlFor="birthPlace"
+            >
+              Birth Place
+            </label>
             <input
               id="birthPlace"
               name="birthPlace"
@@ -115,12 +235,16 @@ const AstrologyForm = () => {
             Submit
           </button>
         </form>
-
         {error && <div className="text-red-500 mt-4">{error}</div>}
         {responseData && (
           <div className="mt-4">
             <h3 className="text-xl font-bold mb-2">Response Data</h3>
-            <pre className="bg-gray-100 text-sm md:text-base lg:text-lg p-4 rounded">{JSON.stringify(responseData, null, 2)}</pre>
+            {Object.entries(responseData).map(([key, data]) => (
+              <div key={key} className="mb-4">
+                <h4 className="text-lg font-semibold mb-2">{key}</h4>
+                {renderTable(data)}
+              </div>
+            ))}
           </div>
         )}
       </div>
