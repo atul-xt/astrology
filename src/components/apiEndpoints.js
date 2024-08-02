@@ -1,3 +1,9 @@
+export const newEndpoints = [
+  "horo_chart_image/SUN",
+  "horo_chart/D-chart",
+  "current_chardasha",
+];
+
 export const apiEndpoints = [
   "birth_details",
   "astro_details",
@@ -27,9 +33,7 @@ export const apiEndpoints = [
   "basic_gem_suggestion",
   "rudraksha_suggestion",
   "sadhesati_remedies",
-  "horo_chart/D-chart",
   "horo_chart_extended/D-chart",
-  "horo_chart_image/SUN",
   "daily_nakshatra_prediction",
   "daily_nakshatra_prediction/next",
   "daily_nakshatra_prediction/previous",
@@ -71,7 +75,6 @@ export const apiEndpoints = [
   "tamil_panchang",
   "panchang_festival",
   "major_chardasha",
-  "current_chardasha",
   "sub_chardasha/aries",
   "major_yogini_dasha",
   "sub_yogini_dasha",

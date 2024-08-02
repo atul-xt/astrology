@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useState } from "react";
-import { apiEndpoints } from "./apiEndpoints";
+import { apiEndpoints, newEndpoints } from "./apiEndpoints";
 
 const AstrologyForm = () => {
   const [formData, setFormData] = useState({
@@ -85,7 +85,7 @@ const AstrologyForm = () => {
     };
 
     await Promise.all(
-      apiEndpoints.map(async (endpoint) => {
+      newEndpoints.map(async (endpoint) => {
         try {
           const response = await axios.post(
             `${baseUrl}${endpoint}`,
