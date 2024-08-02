@@ -1,10 +1,13 @@
 export const newEndpoints = [
-  "horo_chart_image/SUN",
-  "horo_chart/D-chart",
-  "current_chardasha",
+  "tropical_transits/monthly",
+  "tropical_transits/weekly",
+  "tropical_transits/daily",
 ];
 
 export const apiEndpoints = [
+  "horo_chart/D-chart",
+  "current_chardasha",
+  "horo_chart_image/SUN",
   "birth_details",
   "astro_details",
   "planets",
