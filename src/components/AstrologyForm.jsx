@@ -338,7 +338,7 @@ const AstrologyForm = () => {
           </button>
         </form>
         {error && <div className="text-red-500 mt-4">{error}</div>}
-        {newEndpointsData && (
+        {Object.keys(newEndpointsData).length > 0 && (
           <div className="mt-4">
             <h3 className="text-xl font-bold mb-2">New Endpoints Data</h3>
             <div className="flex mb-4">

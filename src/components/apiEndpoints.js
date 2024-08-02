@@ -7,10 +7,9 @@ export const newEndpoints = [
 export const apiEndpoints = [
   "horo_chart/D-chart",
   "current_chardasha",
-  "horo_chart_image/SUN",
-  "birth_details",
-  "astro_details",
   "planets",
+  "astro_details",
+  "birth_details",
   "planets/extended",
   "general_house_report/sun",
   "general_rashi_report/sun",
