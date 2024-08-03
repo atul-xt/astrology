@@ -22,7 +22,7 @@ const AstrologyForm = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("monthly");
 
   const handleSelect = (selectedOption) => {
-    if (selectedOption.value === 'show_more') {
+    if (selectedOption.value === "show_more") {
       setShowMore(true);
       return;
     }
@@ -32,7 +32,7 @@ const AstrologyForm = () => {
   };
 
   const filterCities = (inputValue) => {
-    let filteredCities = LocationData.filter((city) => 
+    let filteredCities = LocationData.filter((city) =>
       city.city_name.toLowerCase().includes(inputValue.toLowerCase())
     ).map((city) => ({
       value: city.city_name,
@@ -82,22 +82,22 @@ const AstrologyForm = () => {
         newEndpoints.map(async (endpoint) => {
           try {
             const response = await axios.post(
-              `${baseUrl}${endpoint}`,
+              `${baseUrl}${endpoint.endPoint}`,
               data,
               requestOptions
             );
-            return { endpoint, data: response.data };
+            return { endpoint: endpoint.endPoint, name: endpoint.name, data: response.data };
           } catch (error) {
-            setError(`Error fetching ${endpoint}: ${error.message}`);
-            return { endpoint, data: null };
+            setError(`Error fetching ${endpoint.endPoint}: ${error.message}`);
+            return { endpoint: endpoint.endPoint, name: endpoint.name, data: null };
           }
         })
       );
 
       // Extract and store the responses
       let newFinalData = {};
-      newEndpointResponses.forEach(({ endpoint, data }) => {
-        newFinalData[endpoint] = data;
+      newEndpointResponses.forEach(({ endpoint, name, data }) => {
+        newFinalData[endpoint] = { name, data };
       });
 
       setNewEndpointsData(newFinalData);
@@ -106,11 +106,23 @@ const AstrologyForm = () => {
     }
   };
 
+  const handleDateBlur = (e) => {
+    const currentDate = new Date();
+    const birthDate = new Date(e.target.value);
+    if (birthDate > currentDate) {
+      alert("Birth date cannot be in the future.");
+      setFormData({
+        ...formData,
+        birthDate: "",
+      });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const [year, month, day] = formData.birthDate.split("-");
     const [hour, min] = formData.birthTime.split(":");
-    let newFinalData = {};
 
     const data = {
       day: parseInt(day),
@@ -173,21 +185,22 @@ const AstrologyForm = () => {
         apiEndpoints.map(async (endpoint) => {
           try {
             const response = await axios.post(
-              `${baseUrl}${endpoint}`,
+              `${baseUrl}${endpoint.endPoint}`,
               data,
               requestOptions
             );
-            return { endpoint, data: response.data };
+            return { endpoint: endpoint.endPoint, name: endpoint.name, data: response.data };
           } catch (error) {
-            setError(`Error fetching ${endpoint}: ${error.message}`);
-            return { endpoint, data: null };
+            setError(`Error fetching ${endpoint.endPoint}: ${error.message}`);
+            return { endpoint: endpoint.endPoint, name: endpoint.name, data: null };
           }
         })
       );
 
       // Extract and store the responses
-      apiEndpointResponses.forEach(({ endpoint, data }) => {
-        newFinalData[endpoint] = data;
+      let newFinalData = {};
+      apiEndpointResponses.forEach(({ endpoint, name, data }) => {
+        newFinalData[endpoint] = { name, data };
       });
 
       // Update state with all the responses
@@ -260,7 +273,7 @@ const AstrologyForm = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4 sm:px-6 lg:px-8">
-      <div className="p-8 w-full       bg-white shadow-md rounded">
+      <div className="p-8 w-full bg-white shadow-md rounded">
         <h2 className="text-2xl font-bold mb-6">Astrology Form</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -293,6 +306,8 @@ const AstrologyForm = () => {
               className="w-full px-3 py-2 border rounded shadow-sm focus:outline-none focus:ring focus:border-blue-300"
               value={formData.birthDate}
               onChange={handleChange}
+              onBlur={handleDateBlur}
+              required
             />
           </div>
           <div className="mb-4">
@@ -340,40 +355,47 @@ const AstrologyForm = () => {
         {error && <div className="text-red-500 mt-4">{error}</div>}
         {Object.keys(newEndpointsData).length > 0 && (
           <div className="mt-4">
-            <h3 className="text-xl font-bold mb-2">New Endpoints Data</h3>
+            <h3 className="text-xl text-center bg-orange-400 py-2 font-bold mb-2">
+              Transits Data (Monthly, Weekly & Daily)
+            </h3>
             <div className="flex mb-4">
               <button
-                className={`px-4 py-2 mr-2 ${selectedPeriod === "monthly" ? "bg-blue-500 text-white" : "bg-gray-200"}`}
+                className={`px-4 py-2 mr-2 ${
+                  selectedPeriod === "monthly" ? "bg-blue-500 text-white" : "bg-gray-200"
+                }`}
                 onClick={() => handlePeriodChange("monthly")}
               >
                 Monthly
               </button>
               <button
-                className={`px-4 py-2 mr-2 ${selectedPeriod === "weekly" ? "bg-blue-500 text-white" : "bg-gray-200"}`}
+                className={`px-4 py-2 mr-2 ${
+                  selectedPeriod === "weekly" ? "bg-blue-500 text-white" : "bg-gray-200"
+                }`}
                 onClick={() => handlePeriodChange("weekly")}
               >
                 Weekly
               </button>
               <button
-                className={`px-4 py-2 ${selectedPeriod === "daily" ? "bg-blue-500 text-white" : "bg-gray-200"}`}
+                className={`px-4 py-2 ${
+                  selectedPeriod === "daily" ? "bg-blue-500 text-white" : "bg-gray-200"
+                }`}
                 onClick={() => handlePeriodChange("daily")}
               >
                 Daily
               </button>
             </div>
             <div>
-              {selectedPeriod === "monthly" && renderTable(newEndpointsData["tropical_transits/monthly"])}
-              {selectedPeriod === "weekly" && renderTable(newEndpointsData["tropical_transits/weekly"])}
-              {selectedPeriod === "daily" && renderTable(newEndpointsData["tropical_transits/daily"])}
+              {selectedPeriod === "monthly" && renderTable(newEndpointsData["tropical_transits/monthly"].data)}
+              {selectedPeriod === "weekly" && renderTable(newEndpointsData["tropical_transits/weekly"].data)}
+              {selectedPeriod === "daily" && renderTable(newEndpointsData["tropical_transits/daily"].data)}
             </div>
           </div>
         )}
         {responseData && (
           <div className="mt-4">
-            <h3 className="text-xl font-bold mb-2">Response Data</h3>
-            {Object.entries(responseData).map(([key, data]) => (
+            {Object.entries(responseData).map(([key, { name, data }]) => (
               <div key={key} className="mb-4">
-                <h4 className="text-lg font-semibold mb-2">{key}</h4>
+                <h4 className="text-lg font-semibold mb-2 text-center py-3 bg-orange-400">{name}</h4>
                 {renderTable(data)}
               </div>
             ))}
@@ -385,4 +407,3 @@ const AstrologyForm = () => {
 };
 
 export default AstrologyForm;
-
